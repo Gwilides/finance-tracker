@@ -2,6 +2,7 @@ package configs
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -16,12 +17,15 @@ type DbConfig struct {
 }
 
 type Config struct {
-	AuthConfig
-	DbConfig
+	Auth AuthConfig
+	Db   DbConfig
 }
 
-func NewConfig() *Config {
-	_ = godotenv.Load()
+func LoadConfig() *Config {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("loading .env file failure")
+	}
 	host := os.Getenv("DB_HOST")
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
@@ -31,10 +35,10 @@ func NewConfig() *Config {
 		host, user, password,
 		name, port)
 	return &Config{
-		AuthConfig: AuthConfig{
+		Auth: AuthConfig{
 			Secret: os.Getenv("JWT_SECRET"),
 		},
-		DbConfig: DbConfig{
+		Db: DbConfig{
 			DSN: dsn,
 		},
 	}
