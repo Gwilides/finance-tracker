@@ -8,8 +8,10 @@ import (
 	"github.com/Gwilides/finance-tracker/configs"
 	"github.com/Gwilides/finance-tracker/internal/account"
 	"github.com/Gwilides/finance-tracker/internal/auth"
+	"github.com/Gwilides/finance-tracker/internal/category"
 	"github.com/Gwilides/finance-tracker/internal/user"
 	"github.com/Gwilides/finance-tracker/pkg/db"
+	"github.com/Gwilides/finance-tracker/pkg/middleware"
 )
 
 func App() http.Handler {
@@ -20,12 +22,17 @@ func App() http.Handler {
 	//Repositories
 	userRepository := user.NewUserRepository(db)
 	accountRepository := account.NewAccountRepository(db)
+	categoryRepository := category.NewCategoryRepository(db)
 
 	//Services
 	authService := auth.NewAuthService(userRepository)
 	accountService := account.NewAccountService(&account.AccountServiceDeps{
 		UserRepository:    userRepository,
 		AccountRepository: accountRepository,
+	})
+	categoryService := category.NewCategoryService(&category.CategoryServiceDeps{
+		UserRepository:     userRepository,
+		CategoryRepository: categoryRepository,
 	})
 
 	//Handlers
@@ -37,13 +44,17 @@ func App() http.Handler {
 		Service: accountService,
 		Config:  &config.Auth,
 	})
+	category.NewCategoryHandler(router, &category.CategoryHandlerDeps{
+		Service: categoryService,
+		Config:  &config.Auth,
+	})
 	return router
 }
 
 func main() {
 	server := http.Server{
 		Addr:    "localhost:8090",
-		Handler: App(),
+		Handler: middleware.Logger(App()),
 	}
 	fmt.Println("Server is listening on port 8090")
 	err := server.ListenAndServe()
