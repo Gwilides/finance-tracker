@@ -73,18 +73,14 @@ func (service *CategoryService) GetById(email string, id uint) (*Category, error
 }
 
 func (service *CategoryService) Update(email string, id uint, body *CategoryUpdateRequest) (*Category, error) {
-	categoryForUpdate, err := service.GetById(email, id)
+	_, err := service.GetById(email, id)
 	if err != nil {
 		return nil, err
 	}
-	category, err := service.categoryRepository.Update(&Category{
-		Model: gorm.Model{ID: categoryForUpdate.ID},
+	return service.categoryRepository.Update(&Category{
+		Model: gorm.Model{ID: id},
 		Title: body.Title,
 	})
-	if err != nil {
-		return nil, err
-	}
-	return category, nil
 }
 
 func (service *CategoryService) Delete(email string, id uint) error {
@@ -92,6 +88,5 @@ func (service *CategoryService) Delete(email string, id uint) error {
 	if err != nil {
 		return err
 	}
-	err = service.categoryRepository.Delete(id)
-	return err
+	return service.categoryRepository.Delete(id)
 }

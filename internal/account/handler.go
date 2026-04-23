@@ -9,7 +9,6 @@ import (
 	"github.com/Gwilides/finance-tracker/pkg/middleware"
 	"github.com/Gwilides/finance-tracker/pkg/req"
 	"github.com/Gwilides/finance-tracker/pkg/res"
-	"gorm.io/gorm"
 )
 
 type AccountHandlerDeps struct {
@@ -84,6 +83,7 @@ func (handler *AccountHandler) goTo() http.HandlerFunc {
 	}
 }
 
+// TODO перенести создание аккаунта в service
 func (handler *AccountHandler) update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		email, ok := handler.extractEmail(w, r)
@@ -100,11 +100,7 @@ func (handler *AccountHandler) update() http.HandlerFunc {
 			res.Json(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		account, err := handler.service.Update(email, &Account{
-			Model: gorm.Model{ID: uint(id)},
-			Type:  body.Type,
-			Title: body.Title,
-		})
+		account, err := handler.service.Update(email, uint(id), body)
 		if errors.Is(err, ErrForbidden) {
 			res.Json(w, err.Error(), http.StatusForbidden)
 			return

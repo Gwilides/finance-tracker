@@ -38,7 +38,6 @@ func (repo *AccountRepository) Update(account *Account) (*Account, error) {
 		return nil, result.Error
 	}
 	return account, nil
-
 }
 
 func (repo *AccountRepository) Delete(id uint) error {

@@ -2,6 +2,7 @@ package account
 
 import (
 	"github.com/Gwilides/finance-tracker/internal/user"
+	"gorm.io/gorm"
 )
 
 type UserProvider interface {
@@ -57,12 +58,16 @@ func (service *AccountService) GetById(email string, id uint) (*Account, error) 
 	return account, nil
 }
 
-func (service *AccountService) Update(email string, account *Account) (*Account, error) {
-	_, err := service.GetById(email, account.ID)
+func (service *AccountService) Update(email string, id uint, body *AccountUpdateRequest) (*Account, error) {
+	_, err := service.GetById(email, id)
 	if err != nil {
 		return nil, err
 	}
-	return service.accountRepository.Update(account)
+	return service.accountRepository.Update(&Account{
+		Model: gorm.Model{ID: id},
+		Type:  body.Type,
+		Title: body.Title,
+	})
 }
 
 func (service *AccountService) Delete(email string, id uint) error {
